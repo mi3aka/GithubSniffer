@@ -1,0 +1,7 @@
+{
+    "mongodb": "mongodb+srv://mongodb:xxx/?retryWrites=true&w=majority",
+    "token": [
+        "ghp_xxx",
+        "ghp_xxx"
+    ]
+}

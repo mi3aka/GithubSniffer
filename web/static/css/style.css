@@ -1,0 +1,6 @@
+.accordion .fa {
+  margin-right: 0.5rem;
+}
+.accordion button, .accordion button:hover, .accordion button:focus{
+  text-decoration: none;
+}

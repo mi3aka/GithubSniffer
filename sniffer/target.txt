@@ -1,0 +1,2 @@
+example.com
+xxx.example.com
