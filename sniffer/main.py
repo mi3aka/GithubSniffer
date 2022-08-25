@@ -31,7 +31,7 @@ class Sniffer:
         return col.find_one({"repository": repository, "subquery": False}) is None
 
     def check_blacklist(self, content, blacklist):
-        for word in blacklist:
+        for word in self.config["blacklist"][blacklist]:
             if word in content:
                 return True
         return False
@@ -115,8 +115,9 @@ class Sniffer:
                             time.sleep(1)
                             continue
                         else:
-                            content = r.text
-                            break
+                            if r.status_code == 200:
+                                content = r.text
+                                break
                     if self.check_blacklist(content.lower(), 'content'):
                         continue
                     if keyword not in content.lower():

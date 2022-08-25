@@ -6,6 +6,10 @@
 
 1.0版本发布,采集端使用`Python`配合`Github API`进行采集,WEB端使用`Flask`和`jquery+bootstrap`进行交互
 
+> 2022.8.25
+
+修复了采集端`check_blacklist`函数的错误,在`query`函数中添加`status_code`判断
+
 2.0版本预计将采集端使用`Golang`进行进行重写,WEB端使用`Gin-Vue-Admin`进行交互,提高效率
 
 # 使用方法
