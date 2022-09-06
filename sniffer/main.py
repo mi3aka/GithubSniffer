@@ -13,7 +13,7 @@ class Sniffer:
             self.config = json.loads(f.read())
         self.token_index = 0
         self.headers_template = {'Accept': 'application/vnd.github+json', 'Connection': 'close', 'Authorization': ''}
-        self.proxy = {'https': 'http://192.168.89.1:7890'}
+        self.proxy = {'https': 'http://192.168.89.1:7890'}  # 根据实际情况判断是否需要代理,不需要则直接注释该行,并将下一行取消注释
         # self.proxy = None
         self.client = pymongo.MongoClient(self.config["mongodb"])  # 链接mongodb
         self.client = self.client["github"]  # mongodb 数据库名
@@ -55,6 +55,8 @@ class Sniffer:
                 result = r.json()
                 if 'message' in result.keys():
                     print(time.time(), result['message'])
+                    if 'Only the first 1000 search results are available' in result['message']:
+                        return None
                     time.sleep(60)
                     continue
                 else:
@@ -67,8 +69,10 @@ class Sniffer:
         for keyword in self.config['subquery']:
             page = 1
             while True:
-                url = "https://api.github.com/search/code?q=repo:{} {}&sort=indexed&per_page={}&page=1".format(repository, keyword, self.config["per_page"])
+                url = "https://api.github.com/search/code?q=repo:{} {}&sort=indexed&per_page={}&page={}".format(repository, keyword, self.config["per_page"], page)
                 result = self.githubapi(url)
+                if result is None:
+                    break
                 for item in result['items']:
                     branch = item['url'][-40:]
                     path = item['path']
@@ -87,12 +91,14 @@ class Sniffer:
         col = self.client["main"]
         col.update_one({"repository": repository}, {"$set": {"subquery": True}})
 
-    def query(self, keyword):
+    def query(self, keyword, size):
         for language in self.config['languages']:
             page = 1
             while True:
-                url = "https://api.github.com/search/code?q={} language:{}&sort=indexed&per_page={}&page={}".format(keyword, language, self.config["per_page"], page)
+                url = "https://api.github.com/search/code?q={} language:{} size:{}..{}&sort=indexed&per_page={}&page={}".format(keyword, language, size * 1000, (size + 5) * 1000, self.config["per_page"], page)
                 result = self.githubapi(url)
+                if result is None:
+                    break
                 for item in result['items']:
                     branch = item['url'][-40:]
                     repository = item['repository']['full_name']
@@ -142,5 +148,6 @@ if __name__ == '__main__':
 
     with open('target.txt') as f:
         targets = f.read().splitlines()
-    for target in targets:
-        sniffer.query(target)
+    for size in range(0, 300, 5):  # 仅查询0-300KB之间的文件,每5KB作为一次查询分割,300KB的限制是因为https://code.jquery.com/jquery-3.6.1.js的大小在300KB左右
+        for target in targets:
+            sniffer.query(target, size)

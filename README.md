@@ -10,6 +10,10 @@
 
 修复了采集端`check_blacklist`函数的错误,在`query`函数中添加`status_code`判断
 
+> 2022.9.6
+
+修复了采集端在遇到`Only the first 1000 search results are available`时的异常终止,在查询时添加`size`参数,极大地扩充了采集结果
+
 2.0版本预计将采集端使用`Golang`进行进行重写,WEB端使用`Gin-Vue-Admin`进行交互,提高效率
 
 # 使用方法
